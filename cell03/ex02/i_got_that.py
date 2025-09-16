@@ -4,4 +4,4 @@ while True:
     if txt == "STOP":
         break
     else:
-        txt = input(" I got that! Anything else: ")
+        txt = input(" I got that! Anything else? : ")
