@@ -42,19 +42,23 @@ def check_pawn_attack(king_r, king_c, lines):
 
 def checkmate(board):
     try:
-        if not board or not board.strip():
-            print("Fail"); return
-        
-        lines = board.strip().split('\n')
-        n = len(lines)
-        if any(len(line) != n for line in lines):
-            print("Fail"); return
-        
+        #no king checker
         king = king_position(board)
         if not king:
             print("Fail"); return
         kr, kc = king
         
+        #check board is square
+        lines = board.strip().split('\n')
+        n = len(lines)
+        if any(len(line) != n for line in lines):
+            print("Fail"); return
+        
+        #no input 
+        if not board or not board.strip():
+            print("Fail"); return
+        
+        #check attack successs
         if (check_pawn_attack(kr, kc, lines) or
             check_sliding_attack(kr, kc, lines, {'R'}, rook_dirs) or
             check_sliding_attack(kr, kc, lines, {'B'}, bishop_dirs) or
