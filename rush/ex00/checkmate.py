@@ -1,96 +1,66 @@
+rook_dirs   = [(0,1),(0,-1),(1,0),(-1,0)]
+bishop_dirs = [(1,1),(1,-1),(-1,1),(-1,-1)]
+queen_dirs  = rook_dirs + bishop_dirs
+
 def find_king(board):
-    king_pos = None
-    king_count = 0
-    for r, row_str in enumerate(board):
-        for c, char in enumerate(row_str):
-            if char == 'K':
-                king_pos = (r, c)
-                king_count += 1
-    if king_count == 1:
-        return king_pos
+    """Find the position of the King on the board"""
+    lines = board.strip().split('\n')
+    for r, row in enumerate(lines):
+        for c, piece in enumerate(row):
+            if piece == 'K':
+                return r, c
     return None
 
-def is_valid_board(board):
-    """ตรวจสอบว่ากระดานเป็นสี่เหลี่ยมจัตุรัสมั้ย"""
-    if not board:
-        return False
-    rows = len(board)
-    for row_str in board:
-        if len(row_str) != rows:
-            return False
-    return True
+def is_valid(r, c, lines):
+    """Check if position is inside the board"""
+    return 0 <= r < len(lines) and 0 <= c < len(lines[0])
+
+def check_sliding_attack(king_r, king_c, lines, attackers, directions):
+    """
+    Generic function for Rook, Bishop, Queen.
+    attackers = set(['R']), set(['B']), or set(['Q'])
+    directions = list of (dr, dc)
+    """
+    for dr, dc in directions:
+        r, c = king_r + dr, king_c + dc
+        while is_valid(r, c, lines):
+            piece = lines[r][c]
+            if piece in attackers:
+                return True
+            elif piece not in ('.', ' '):  # blocked
+                break
+            r, c = r + dr, c + dc
+    return False
+
+def check_pawn_attack(king_r, king_c, lines):
+    """Check if Pawn attacks King (downward only in this version)"""
+    for dr, dc in [(1, -1), (1, 1)]:
+        r, c = king_r + dr, king_c + dc
+        if is_valid(r, c, lines) and lines[r][c] == 'P':
+            return True
+    return False
 
 def checkmate(board):
-    """ตรวจสอบความถูกต้องของกระดาน"""
-    if not is_valid_board(board):
+    try:
+        if not board or not board.strip():
+            print("Fail"); return
+        
+        lines = board.strip().split('\n')
+        n = len(lines)
+        if any(len(line) != n for line in lines):
+            print("Fail"); return
+        
+        king = find_king(board)
+        if not king:
+            print("Fail"); return
+        kr, kc = king
+        
+        if (check_pawn_attack(kr, kc, lines) or
+            check_sliding_attack(kr, kc, lines, {'R'}, rook_dirs) or
+            check_sliding_attack(kr, kc, lines, {'B'}, bishop_dirs) or
+            check_sliding_attack(kr, kc, lines, {'Q'}, queen_dirs)):
+            print("Success")
+        else:
+            print("Fail")
+    except Exception:
         print("Fail")
-        return
-
-    """หาตำแหน่งคิง"""
-    king_pos = find_king(board)
-    if not king_pos:
-        print("Fail")
-        return
-
-    king_r, king_c = king_pos
-    size = len(board)
-
-    """วนลูปเพื่อหาตัวหมากศัตรูทั้งหมด"""
-    for r, row_str in enumerate(board):
-        for c, piece in enumerate(row_str):
-            is_threat = False
-            
-            """ตรวจ Pawn"""
-            if piece == 'P':
-                """Pawnจะรุกเมื่ออยู่แนวทแยงที่ติดกับคิง"""
-                if abs(r - king_r) == 1 and abs(c - king_c) == 1:
-                    is_threat = True
-
-            """ตรวจ Rook, Queen ในแนวตั้งและแนวนอน"""
-            if piece in 'RQ':
-                """ตรวจแนวนอน"""
-                if r == king_r:
-                    path_clear = True
-                    start, end = min(c, king_c), max(c, king_c)
-                    for i in range(start + 1, end):
-                        if board[r][i] != '.':
-                            path_clear = False
-                            break
-                    if path_clear:
-                        is_threat = True
-                
-                """ตรวจแนวตั้ง"""
-                if c == king_c and not is_threat:
-                    path_clear = True
-                    start, end = min(r, king_r), max(r, king_r)
-                    for i in range(start + 1, end):
-                        if board[i][c] != '.':
-                            path_clear = False
-                            break
-                    if path_clear:
-                        is_threat = True
-
-            """ตรวจ Bishop, Queen ในแนวทแยง"""
-            if piece in 'BQ': 
-                """ตรวจแนวทแยง"""
-                if abs(r - king_r) == abs(c - king_c):
-                    path_clear = True
-                    step_r = 1 if king_r > r else -1
-                    step_c = 1 if king_c > c else -1
-                    curr_r, curr_c = r + step_r, c + step_c
-                    while curr_r != king_r:
-                        if board[curr_r][curr_c] != '.':
-                            path_clear = False
-                            break
-                        curr_r += step_r
-                        curr_c += step_c
-                    if path_clear:
-                        is_threat = True
-            
-            """ถ้ารุกได้แสดง Success แล้วจบการทำงาน"""
-            if is_threat:
-                print("Success")
-                return
-
-    """วนลูปจนจบแล้วรุกไม่ได้"""
-    print("Fail")
