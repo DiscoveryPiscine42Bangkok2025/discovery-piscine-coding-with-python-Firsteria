@@ -8,7 +8,7 @@ R...
 ..P.
 ....\
 """
-    board = board.strip().splitlines()
+    print("Test 1:")
     checkmate(board1)
     
     # Test Case 2 (from PDF example)
@@ -16,7 +16,7 @@ R...
 ..
 .K\
 """
-    board = board.strip().splitlines()
+    print("Test 2:")
     checkmate(board2)
     
     # Test Case 3: Queen attack
@@ -26,8 +26,8 @@ Q...
 ....
 ...K\
 """
-    board = board.strip().splitlines()
-    checkmate(board)
+    print("Test 3 (Queen attack):")
+    checkmate(board3)
     
     # Test Case 4: Bishop attack
     board4 = """\
@@ -36,8 +36,8 @@ B...
 ....
 ...K\
 """
-    board = board.strip().splitlines()
-    checkmate(board)
+    print("Test 4 (Bishop attack):")
+    checkmate(board4)
     
     # Test Case 5: No attack
     board5 = """\

@@ -2,7 +2,7 @@ rook_dirs   = [(0,1),(0,-1),(1,0),(-1,0)]
 bishop_dirs = [(1,1),(1,-1),(-1,1),(-1,-1)]
 queen_dirs  = rook_dirs + bishop_dirs
 
-def find_king(board):
+def king_position(board):
     """Find the position of the King on the board"""
     lines = board.strip().split('\n')
     for r, row in enumerate(lines):
@@ -50,7 +50,7 @@ def checkmate(board):
         if any(len(line) != n for line in lines):
             print("Fail"); return
         
-        king = find_king(board)
+        king = king_position(board)
         if not king:
             print("Fail"); return
         kr, kc = king
